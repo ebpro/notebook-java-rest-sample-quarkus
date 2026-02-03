@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-products}
+      POSTGRES_USER: ${DB_USER:-tpuser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-Tp@2026}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - product-network
+    healthcheck:
+      # Utilise les variables internes au container Postgres
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB} || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  product-catalog:
+    image: ${IMAGE_GROUP:-brunoe}/${IMAGE_NAME:-product-catalog}:${TAG:-1.0.0-jib}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${DB_USER:-tpuser}
+      DB_PASSWORD: ${DB_PASSWORD:-Tp@2026}
+      HIBERNATE_GENERATION: ${HIBERNATE_GENERATION:-update}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_SQL: ${LOG_SQL:-false}
+      JAVA_OPTS: ${JAVA_OPTS:-Xms256m -Xmx512m -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0}
+    ports:
+      - "${HOST_HTTP_PORT:-8080}:8080"
+    networks:
+      - product-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  product-network:
+    driver: bridge
