@@ -1,19 +1,23 @@
-# ------------------------------
-# Tests pour ProductResource V1
-# ------------------------------
+########################################
+# Environnement
+########################################
+
+# Dev environment
+@baseUrl = http://localhost:8080
+# Staging environment
+#@baseUrl = https://products.localhost:5443
+
+########################################
+# Tests ProductResource V1
+# IN MEMO ONLY
+########################################
 
 ### GET all products V1
-# SGTP: GET /api/v1/products → 200 OK
-# curl -s -X GET http://localhost:8080/api/v1/products | jq
-GET http://localhost:8080/api/v1/products
+GET {{baseUrl}}/api/v1/products
 Accept: application/json
 
 ### POST create product V1
-# SGTP: POST /api/v1/products → 201 Created
-# curl -s -X POST http://localhost:8080/api/v1/products \
-#      -H "Content-Type: application/json" \
-#      -d '{"sku":"P001","name":"Produit 1","price":12.5,"stock":100}' | jq
-POST http://localhost:8080/api/v1/products
+POST {{baseUrl}}/api/v1/products
 Content-Type: application/json
 
 {
@@ -23,12 +27,19 @@ Content-Type: application/json
   "stock": 100
 }
 
+### POST create product V2
+POST {{baseUrl}}/api/v1/products
+Content-Type: application/json
+
+{
+  "sku": "P002",
+  "name": "Produit 2",
+  "price": 15.0,
+  "stock": 10
+}
+
 ### POST create product V1 conflict
-# SGTP: POST /api/v1/products → 409 Conflict
-# curl -s -X POST http://localhost:8080/api/v1/products \
-#      -H "Content-Type: application/json" \
-#      -d '{"sku":"P001","name":"Produit 1 bis","price":15.0,"stock":50}' | jq
-POST http://localhost:8080/api/v1/products
+POST {{baseUrl}}/api/v1/products
 Content-Type: application/json
 
 {
@@ -38,28 +49,20 @@ Content-Type: application/json
   "stock": 50
 }
 
-# ------------------------------
-# Tests pour ProductResource V2
-# ------------------------------
+########################################
+# Tests ProductResource V2
+########################################
 
 ### GET all products V2
-# SGTP: GET /api/v2/products → 200 OK
-# curl -s http://localhost:8080/api/v2/products | jq
-GET http://localhost:8080/api/v2/products
+GET {{baseUrl}}/api/v2/products
 Accept: application/json
 
 ### GET product by SKU V2
-# SGTP: GET /api/v2/products/P001 → 200 OK
-# curl -s http://localhost:8080/api/v2/products/P001 | jq
-GET http://localhost:8080/api/v2/products/P001
+GET {{baseUrl}}/api/v2/products/P001
 Accept: application/json
 
 ### POST create product V2
-# SGTP: POST /api/v2/products → 201 Created
-# curl -s -X POST http://localhost:8080/api/v2/products \
-#      -H "Content-Type: application/json" \
-#      -d '{"sku":"P002","name":"Produit 2","price":20.0,"stock":200}' | jq
-POST http://localhost:8080/api/v2/products
+POST {{baseUrl}}/api/v2/products
 Content-Type: application/json
 
 {
@@ -70,32 +73,22 @@ Content-Type: application/json
 }
 
 ### DELETE product V2
-# SGTP: DELETE /api/v2/products/P002 → 204 No Content
-# curl -s -X DELETE http://localhost:8080/api/v2/products/P002 -w "%{http_code}\n"
-DELETE http://localhost:8080/api/v2/products/P002
+DELETE {{baseUrl}}/api/v2/products/P002
 
-# ------------------------------
-# Tests pour ProductResource V3
-# ------------------------------
+########################################
+# Tests ProductResource V3
+########################################
 
 ### GET all products V3
-# SGTP: GET /api/v3/products → 200 OK
-# curl -s http://localhost:8080/api/v3/products | jq
-GET http://localhost:8080/api/v3/products
+GET {{baseUrl}}/api/v3/products
 Accept: application/json
 
 ### GET product by SKU V3
-# SGTP: GET /api/v3/products/P001 → 200 OK
-# curl -s http://localhost:8080/api/v3/products/P001 | jq
-GET http://localhost:8080/api/v3/products/P001
+GET {{baseUrl}}/api/v3/products/P001
 Accept: application/json
 
 ### POST create product V3
-# SGTP: POST /api/v3/products → 201 Created
-# curl -s -X POST http://localhost:8080/api/v3/products \
-#      -H "Content-Type: application/json" \
-#      -d '{"sku":"P003","name":"Produit 3","price":30.0,"stock":300}' | jq
-POST http://localhost:8080/api/v3/products
+POST {{baseUrl}}/api/v3/products
 Content-Type: application/json
 
 {
@@ -106,32 +99,22 @@ Content-Type: application/json
 }
 
 ### DELETE product V3
-# SGTP: DELETE /api/v3/products/P003 → 204 No Content
-# curl -s -X DELETE http://localhost:8080/api/v3/products/P003 -w "%{http_code}\n"
-DELETE http://localhost:8080/api/v3/products/P003
+DELETE {{baseUrl}}/api/v3/products/P003
 
-# ------------------------------
-# Tests pour ProductResource V4
-# ------------------------------
+########################################
+# Tests ProductResource V4
+########################################
 
 ### GET all products V4
-# SGTP: GET /api/v4/products → 200 OK
-# curl -s http://localhost:8080/api/v4/products | jq
-GET http://localhost:8080/api/v4/products
+GET {{baseUrl}}/api/v4/products
 Accept: application/json
 
 ### GET product by SKU V4
-# SGTP: GET /api/v4/products/P001 → 200 OK
-# curl -s http://localhost:8080/api/v4/products/P001 | jq
-GET http://localhost:8080/api/v4/products/P001
+GET {{baseUrl}}/api/v4/products/P001
 Accept: application/json
 
 ### POST create product V4
-# SGTP: POST /api/v4/products → 201 Created
-# curl -s -X POST http://localhost:8080/api/v4/products \
-#      -H "Content-Type: application/json" \
-#      -d '{"sku":"P004","name":"Produit 4","price":40.0,"stock":400}' | jq
-POST http://localhost:8080/api/v4/products
+POST {{baseUrl}}/api/v4/products
 Content-Type: application/json
 
 {
@@ -142,32 +125,22 @@ Content-Type: application/json
 }
 
 ### DELETE product V4
-# SGTP: DELETE /api/v4/products/P004 → 204 No Content
-# curl -s -X DELETE http://localhost:8080/api/v4/products/P004 -w "%{http_code}\n"
-DELETE http://localhost:8080/api/v4/products/P004
+DELETE {{baseUrl}}/api/v4/products/P004
 
-# ------------------------------
-# Tests pour ProductResource V5
-# ------------------------------
+########################################
+# Tests ProductResource V5
+########################################
 
 ### GET all products V5
-# SGTP: GET /api/v5/products → 200 OK
-# curl -s http://localhost:8080/api/v5/products | jq
-GET http://localhost:8080/api/v5/products
+GET {{baseUrl}}/api/v5/products
 Accept: application/json
 
 ### GET product by SKU V5
-# SGTP: GET /api/v5/products/P001 → 200 OK
-# curl -s http://localhost:8080/api/v5/products/P001 | jq
-GET http://localhost:8080/api/v5/products/P001
+GET {{baseUrl}}/api/v5/products/P001
 Accept: application/json
 
 ### POST create product V5
-# SGTP: POST /api/v5/products → 201 Created
-# curl -s -X POST http://localhost:8080/api/v5/products \
-#      -H "Content-Type: application/json" \
-#      -d '{"sku":"P005","name":"Produit 5","price":50.0,"stock":500}' | jq
-POST http://localhost:8080/api/v5/products
+POST {{baseUrl}}/api/v5/products
 Content-Type: application/json
 
 {
@@ -178,6 +151,4 @@ Content-Type: application/json
 }
 
 ### DELETE product V5
-# SGTP: DELETE /api/v5/products/P005 → 204 No Content
-# curl -s -X DELETE http://localhost:8080/api/v5/products/P005 -w "%{http_code}\n"
-DELETE http://localhost:8080/api/v5/products/P005
+DELETE {{baseUrl}}/api/v5/products/P005
