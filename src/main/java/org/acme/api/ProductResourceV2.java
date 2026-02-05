@@ -84,7 +84,7 @@ public class ProductResourceV2 {
 
         if (existing.isPresent()) {
             return Response.status(Response.Status.CONFLICT)
-                    .entity("Product with this SKU already exists")
+                    .entity("SKU already exists")
                     .build();
         }
 
@@ -112,4 +112,12 @@ public class ProductResourceV2 {
         }
         return Response.noContent().build();
     }
+
+    // ⚠️ Solution temporaire pour la pédagogie.
+    // Dans une vraie application, la gestion des données
+    // devrait être externalisée dans un repository/service.
+    public static void clearProducts() {
+        products.clear();
+    }
+
 }

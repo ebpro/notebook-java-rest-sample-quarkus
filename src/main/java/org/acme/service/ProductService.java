@@ -19,7 +19,8 @@ import java.util.List;
  * 🔹 Transactionnel pour les modifications (création, suppression).
  *
  * Important :
- * - Ne contient pas de logique de persistance détaillée (déjà dans le repository).
+ * - Ne contient pas de logique de persistance détaillée (déjà dans le
+ * repository).
  * - Ne s’occupe pas du mapping DTO ↔ Entity (sera introduit en V4).
  */
 @ApplicationScoped
@@ -38,6 +39,7 @@ public class ProductService {
 
     /**
      * Récupère tous les produits.
+     *
      * @return liste de ProductEntity
      */
     public List<ProductEntity> getAll() {
@@ -46,6 +48,7 @@ public class ProductService {
 
     /**
      * Récupère un produit par SKU.
+     *
      * @param sku identifiant unique
      * @return ProductEntity trouvé
      * @throws NotFoundException si le produit n'existe pas
@@ -60,6 +63,7 @@ public class ProductService {
     /**
      * Crée un produit.
      * Vérifie que le SKU est unique.
+     *
      * @param product produit à créer
      * @return ProductEntity créé
      * @throws WebApplicationException si le SKU existe déjà
@@ -69,14 +73,14 @@ public class ProductService {
         if (repository.findBySku(product.getSku()) != null) {
             throw new WebApplicationException(
                     "Product with this SKU already exists",
-                    Response.Status.CONFLICT
-            );
+                    Response.Status.CONFLICT);
         }
         return repository.persist(product);
     }
 
     /**
      * Supprime un produit par SKU.
+     *
      * @param sku identifiant unique
      * @throws NotFoundException si le produit n'existe pas
      */
@@ -87,4 +91,15 @@ public class ProductService {
             throw new NotFoundException("Product not found");
         repository.delete(p);
     }
+
+    /**
+     * Supprime tous les produits de la base.
+     * ⚠️ À utiliser uniquement pour les tests, pas dans une application réelle.
+     *
+     */
+    @Transactional
+    public void clearAll() {
+        repository.deleteAll();
+    }
+
 }

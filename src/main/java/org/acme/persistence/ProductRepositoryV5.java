@@ -51,4 +51,5 @@ public class ProductRepositoryV5 implements PanacheRepository<ProductEntity> {
         // ?1 et ?2 sont des paramètres positionnels
         return list("price >= ?1 and price <= ?2", min, max);
     }
+
 }

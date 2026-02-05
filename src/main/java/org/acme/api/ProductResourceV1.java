@@ -12,7 +12,8 @@ import java.util.Optional;
 /**
  * Resource REST minimale pour gérer des produits en mémoire.
  *
- * Caractéristiques : pas de base de données, logique métier simple dans la ressource.
+ * Caractéristiques : pas de base de données, logique métier simple dans la
+ * ressource.
  * Endpoints :
  * - GET /api/v1/products : récupère tous les produits
  * - POST /api/v1/products : crée un nouveau produit si SKU unique
@@ -66,7 +67,7 @@ public class ProductResourceV1 {
         if (existing.isPresent()) {
             // SKU déjà existant → HTTP 409 Conflict
             return Response.status(Response.Status.CONFLICT)
-                    .entity("Product with this SKU already exists")
+                    .entity("SKU already exists")
                     .build();
         }
 
@@ -77,5 +78,12 @@ public class ProductResourceV1 {
         return Response.status(Response.Status.CREATED)
                 .entity(product)
                 .build();
+    }
+
+    // ⚠️ Solution temporaire pour la pédagogie.
+    // Dans une vraie application, la gestion des données
+    // devrait être externalisée dans un repository/service.
+    public static void clearProducts() {
+        products.clear();
     }
 }

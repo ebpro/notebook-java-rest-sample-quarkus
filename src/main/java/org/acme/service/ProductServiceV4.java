@@ -2,6 +2,7 @@ package org.acme.service;
 
 import org.acme.dto.CreateProductRequest;
 import org.acme.dto.ProductDTO;
+import org.acme.mapper.ProductMapper;
 import org.acme.persistence.ProductEntity;
 import org.acme.persistence.ProductRepository;
 
@@ -41,7 +42,7 @@ public class ProductServiceV4 {
 
     /**
      * Récupère tous les produits
-     * 
+     *
      * @return liste de ProductDTO
      */
     public List<ProductDTO> getAll() {
@@ -52,7 +53,7 @@ public class ProductServiceV4 {
 
     /**
      * Récupère un produit par SKU
-     * 
+     *
      * @param sku identifiant unique
      * @return ProductDTO correspondant
      * @throws NotFoundException si le produit n'existe pas
@@ -67,32 +68,35 @@ public class ProductServiceV4 {
 
     /**
      * Crée un nouveau produit
-     * 
+     *
      * @param request données du produit
      * @return ProductDTO créé
      * @throws WebApplicationException si SKU déjà existant
      */
     @Transactional
     public ProductDTO create(CreateProductRequest request) {
-        if (repository.findBySku(request.sku()) != null) {
+        // 1. UTILISATION DU DOMAINE (via le Mapper)
+        // C'est ici que l'étudiant comprend l'intérêt du Domaine :
+        // Si request.price() est -10.0, Product.of() explose ici.
+        ProductEntity entity = ProductMapper.toEntity(request);
+
+        // 2. LOGIQUE TECHNIQUE (Persistance)
+        if (repository.findBySku(entity.getSku()) != null) {
             throw new WebApplicationException(
                     "Product with this SKU already exists",
                     Response.Status.CONFLICT);
         }
 
-        ProductEntity entity = new ProductEntity(
-                request.sku(),
-                request.name(),
-                request.price(),
-                request.stock());
-
+        // 3. PERSISTANCE
         repository.persist(entity);
-        return toDTO(entity);
+
+        // 4. RETOUR DTO
+        return ProductMapper.toDto(entity);
     }
 
     /**
      * Supprime un produit par SKU
-     * 
+     *
      * @param sku identifiant unique
      * @throws NotFoundException si le produit n'existe pas
      */
@@ -107,7 +111,7 @@ public class ProductServiceV4 {
 
     /**
      * Mapping ProductEntity → ProductDTO
-     * 
+     *
      * @param entity entité JPA
      * @return DTO correspondant
      */
@@ -117,5 +121,15 @@ public class ProductServiceV4 {
                 entity.getName(),
                 entity.getPrice(),
                 entity.getStock());
+    }
+
+    /**
+     * Supprime tous les produits de la base.
+     * ⚠️ À utiliser uniquement pour les tests, pas dans une application réelle.
+     *
+     */
+    @Transactional
+    public void clearAll() {
+        repository.deleteAll();
     }
 }

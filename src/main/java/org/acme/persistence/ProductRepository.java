@@ -71,4 +71,23 @@ public class ProductRepository {
         // Si l’EntityManager ne connaît pas l’entité, on merge avant remove
         em.remove(em.contains(product) ? product : em.merge(product));
     }
+
+    /**
+     * Supprime tous les produits de la base.
+     * ⚠️ À utiliser uniquement pour les tests, pas dans une application réelle.
+     *
+     */
+    public void deleteAll() {
+        em.createQuery("DELETE FROM ProductEntity").executeUpdate();
+    }
+
+    /**
+     * Force l’exécution de toutes les opérations en attente sur la base.
+     * Utile pour s’assurer que les données sont effectivement supprimées avant de
+     * continuer.
+     */
+    public void flush() {
+        em.flush();
+    }
+
 }

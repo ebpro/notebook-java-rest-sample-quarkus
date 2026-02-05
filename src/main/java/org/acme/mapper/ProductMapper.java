@@ -3,30 +3,15 @@ package org.acme.mapper;
 import org.acme.persistence.ProductEntity;
 import org.acme.dto.ProductDTO;
 import org.acme.dto.CreateProductRequest;
+import org.acme.domain.Product;
 
-/**
- * Mapper pour convertir entre :
- * - ProductEntity (persistence)
- * - ProductDTO / CreateProductRequest (API)
- *
- * Séparation claire des responsabilités :
- * - ProductEntity : gère la base de données
- * - ProductDTO / CreateProductRequest : gère l’API / l’exposition
- * - ProductMapper : fait la traduction entre les deux
- *
- * 🔹 Toutes les méthodes sont statiques → pas besoin d’instance.
- */
 public class ProductMapper {
 
-    // Constructeur privé pour empêcher l'instanciation
     private ProductMapper() {
     }
 
     /**
-     * Transforme une entité JPA en DTO pour l’API.
-     *
-     * @param entity l'entité ProductEntity
-     * @return ProductDTO correspondant
+     * Conversion pour la sortie (API)
      */
     public static ProductDTO toDto(ProductEntity entity) {
         return new ProductDTO(
@@ -37,16 +22,22 @@ public class ProductMapper {
     }
 
     /**
-     * Transforme un objet reçu via l'API en entité JPA.
-     *
-     * @param request l'objet CreateProductRequest reçu
-     * @return ProductEntity prêt à être persisté
+     * Conversion pour l'entrée (Persistance) avec validation Domaine
      */
     public static ProductEntity toEntity(CreateProductRequest request) {
-        return new ProductEntity(
+        // Étape 1 : Création de l'objet métier (Validation des règles de gestion)
+        // C'est ici que l' IllegalArgumentException est jetée si prix < 0.
+        var domain = Product.of(
                 request.sku(),
                 request.name(),
                 request.price(),
                 request.stock());
+
+        // Étape 2 : Si on arrive ici, le domaine est valide, on peut créer l'entité
+        return new ProductEntity(
+                domain.sku(),
+                domain.name(),
+                domain.price(),
+                domain.stock());
     }
 }
