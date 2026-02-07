@@ -22,7 +22,10 @@ jobs:
 
     - name: Build with Maven
       # We run 'verify' to trigger Surefire (Unit) and Failsafe (Integration/Cucumber)
-      run: ./mvnw -B verify
+      run: |
+        # Get the timestamp of the latest commit
+        TIMESTAMP=$(git log -1 --format=%cI)
+        ./mvnw -B verify -Dproject.build.outputTimestamp=$TIMESTAMP
     - name: Login to DockerHub
       uses: docker/login-action@v3
       with:
@@ -30,7 +33,10 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Build and Push Multi-arch Image
       run: |
-        ./mvnw clean package -Pjvm \
+        # Get the timestamp of the latest commit
+        TIMESTAMP=$(git log -1 --format=%cI)
+        ./mvnw clean package -Dproject.build.outputTimestamp=$TIMESTAMP \
+          -Pjvm \
           -Dquarkus.container-image.push=true \
           -Dquarkus.container-image.registry=docker.io \
           -Dquarkus.jib.platforms=linux/amd64,linux/arm64

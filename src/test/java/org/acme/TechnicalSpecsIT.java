@@ -1,63 +1,54 @@
 package org.acme;
 
 import io.quarkus.test.junit.QuarkusTest;
-
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.*;
 
+/**
+ * Integration Tests for Technical Specifications (Non-Functional Requirements).
+ * This class validates the observability stack [NFR-QA-03].
+ */
 @QuarkusTest
 @Tag("NFR")
-@Disabled
+@DisplayName("Technical Specifications - Observability & Health")
 class TechnicalSpecsIT {
 
-  /**
-   * Valide [NFR-QA-03] Observability
-   * Vérifie que les endpoints de santé Quarkus sont actifs.
-   */
-  @Test
-  void testHealthCheckLiveness() {
-    given()
-        .when().get("/q/health/live")
-        .then()
-        .statusCode(200)
-        .body("status", equalTo("UP"));
-  }
+    @Test
+    @DisplayName("Liveness probe should be UP")
+    void testHealthCheckLiveness() {
+        given()
+            .when().get("/q/health/live")
+            .then()
+            .statusCode(200)
+            .header("Content-Type", containsString("application/json"))
+            .body("status", is("UP"));
+    }
 
-  /**
-   * Valide [NFR-SEC-03] Information Leakage
-   * On envoie un payload corrompu et on vérifie qu'aucune info sensible ne fuite.
-   */
-  @Test
-  void testNoStacktraceLeakageOnInvalidJson() {
-    given()
-        .header("Content-Type", "application/json")
-        .body("{ \"sku\": \"ERROR-1\", \"price\": \"not-a-number\" }") // Format invalide
-        .when()
-        .post("/api/v5/products")
-        .then()
-        .statusCode(anyOf(is(400), is(404), is(422))) // On attend une erreur client
-        .body(not(containsString("stacktrace")))
-        .body(not(containsString("at io.quarkus")))
-        .body(not(containsString("hibernate")))
-        .body(not(containsString("exception")));
-  }
+    @Test
+    @DisplayName("Readiness probe should be UP and Database connected")
+    void testHealthCheckReadiness() {
+        given()
+            .when().get("/q/health/ready")
+            .then()
+            .statusCode(200)
+            .header("Content-Type", containsString("application/json"))
+            .body("status", is("UP"))
+            // Validates that SmallRye Health is correctly monitoring the PostgreSQL connection
+            .body("checks.name", hasItem("Database connections health check"))
+            .body("checks.find { it.name == 'Database connections health check' }.status", is("UP"));
+    }
 
-  /**
-   * Valide [NFR-SEC-01] Input Sanitization
-   * Teste les prix négatifs ou les stocks incohérents.
-   */
-  @Test
-  void testRejectNegativePrice() {
-    given()
-        .header("Content-Type", "application/json")
-        .body("{ \"sku\": \"NEG-1\", \"name\": \"Bad Price\", \"price\": -10.0, \"stock\": 10 }")
-        .when()
-        .post("/api/v5/products")
-        .then()
-        .statusCode(anyOf(is(400), is(422)));
-  }
-
+    @Test
+    @DisplayName("Global Health UI should be accessible")
+    void testHealthUI() {
+        // Validates that the SmallRye Health UI is active
+        given()
+            .when().get("/q/health-ui/")
+            .then()
+            .statusCode(200);
+    }
 }

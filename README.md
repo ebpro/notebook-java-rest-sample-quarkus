@@ -18,9 +18,18 @@ This repository is an incremental, illustrative Quarkus-based product catalog th
 
 Use the one-liner below to run the full stack (Postgres + App + Traefik + Prometheus + Grafana) with Docker Compose.
 
+The JVM image is used by default,
+
 ```bash
 curl -sSL https://raw.githubusercontent.com/ebpro/notebook-java-rest-sample-quarkus/develop/compose.yml | \
     docker compose -f - up -d
+```
+
+but you can switch to the native image by setting the `IMAGE_TAG` environment variable to `1.0.0-native` before running the command.
+
+```bash
+curl -sSL https://raw.githubusercontent.com/ebpro/notebook-java-rest-sample-quarkus/develop/compose.yml | \
+    IMAGE_TAG=1.0.0-native docker compose -f - up -d
 ```
 
 and use the API :
@@ -51,6 +60,13 @@ curl -v -X GET http://localhost:8080/api/v5/products \
 
 curl -v -X GET http://localhost:8080/api/v5/products/P001 \
   -H "Accept: application/json"
+```
+
+shut down the stack when done with:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/ebpro/notebook-java-rest-sample-quarkus/develop/compose.yml | \
+    docker compose -f - down -v
 ```
 
 ## Quick Start
@@ -364,9 +380,27 @@ graph TD
     style DB fill:#bbf,stroke:#333,stroke-width:2px
 ```
 
+### Native Image
+
+The project is also configured to build a native image with GraalVM. This is an optimized binary that starts very fast and has a low memory footprint, but it is not intended for development use (no hot reload, no dev tools, no debug support). Use the `quarkus:dev` mode for development and the JIB image for production or integration testing.
+
+To build the native image, you need to have GraalVM installed and set up on your machine. Then you can run:
+
+```bash
+./mvnw package -Pnative \
+  -Dquarkus.container-image.tag=1.0.0-native
+```
+
+list the generated native image:
+
+```bash
+docker image ls product-catalog
+```
+
+
 ## Key files to inspect about build and architecture
 
-- `pom.xml`, `compose.yml`, `compose.prod.yml`, `compose.traefik.yml`
+- `pom.xml`, `compose.yml`, `compose.prod.yml`, `traefik/dynamic/dynamic.yml`
 
 ### Step-by-step exploration (recommended order)
 
@@ -406,7 +440,7 @@ The API contract is decoupled from the internal data model (Entities) to ensure 
 - **Architecture:** Information Hiding. Internal JPA entities are strictly encapsulated.
 - **Key Lesson:** Protecting the public API. Changes to the database schema (Entities) no longer force breaking changes on API consumers, as the exchange format (DTO) remains stable.
 
-See the evolution of the `ProductResourceV4` which now uses `ProductDTO` and `CreateProductRequest` instead of directly exposing the domain model. The `ProductMapper` is introduced to handle conversions between Entities and DTOs, further decoupling the layers and adhering to the Single Responsibility Principle.
+See the evolution of the `ProductResource` in the v4 package ([src/main/java/org/acme/api/v4/ProductResource.java](src/main/java/org/acme/api/v4/ProductResource.java)) which now uses `ProductDTO` and `CreateProductRequest` instead of directly exposing the domain model. The `ProductMapper` is introduced to handle conversions between Entities and DTOs, further decoupling the layers and adhering to the Single Responsibility Principle.
 
 ##### Phase 3: Professionalization
 
@@ -430,7 +464,7 @@ The final stage focuses on input safety and API discoverability, preparing the c
 
 #### The Persistence Layer (Entities)
 
-Compare [src/main/java/org/acme/persistence/ProductRepository.java](src/main/java/org/acme/persistence/ProductRepository.java) with [src/main/java/org/acme/persistence/ProductRepositoryV5.java](src/main/java/org/acme/persistence/ProductRepositoryV5.java).
+Compare [src/main/java/org/acme/persistence/v1/ProductRepositoryV1.java](src/main/java/org/acme/persistence/v1/ProductRepositoryV1.java) with [src/main/java/org/acme/persistence/v5/ProductRepositoryV5.java](src/main/java/org/acme/persistence/v5/ProductRepositoryV5.java).
 
 The `ProductEntity` is the blueprint for the database schema.
 
@@ -453,7 +487,7 @@ The project highlights two distinct approaches to Data Access in the Java ecosys
 
 #### The Service Layer
 
-Open [src/main/java/org/acme/service/ProductService.java](src/main/java/org/acme/service/ProductService.java) and follow changes toward `ProductServiceV4` and `ProductServiceV5`.
+Open [src/main/java/org/acme/service/v4/ProductServiceV4.java](src/main/java/org/acme/service/v4/ProductServiceV4.java) and [src/main/java/org/acme/service/v5/ProductServiceV5.java](src/main/java/org/acme/service/v5/ProductServiceV5.java) and follow changes toward `ProductServiceV4` and `ProductServiceV5`.
 
 Before V3, the API was "Resource-Heavy," meaning the web controllers handled business logic and data storage directly. This created a fragile design where business rules were tightly coupled to HTTP protocols. Introducing the ProductService allowed us to centralize our business logic into a dedicated, framework-neutral layer. This separation ensures that the Resource only focuses on communication, while the Service focuses on orchestration, making the code easier to maintain, test, and evolve.
 
@@ -584,3 +618,24 @@ Modern microservices don't manually construct HTTP requests using raw strings. H
 - Look at the `target/` contents and `quarkus-app/` to understand generated artifacts.
 - Use `docker compose` files to learn how the app is expected to be deployed with Postgres and Traefik. Inspect `postgres/init/` for DB initialization SQL.
 
+### Simple JVM vs Native comparison
+
+```bash
+docker compose down product-catalog && docker compose up product-catalog -d && \
+START_TIME=$(date +%s%3N) && \
+until $(curl --output /dev/null --silent --head --fail http://localhost:8080/health/ready); do sleep 0.01; done && \
+END_TIME=$(date +%s%3N) && \
+echo "Total Startup Time: $((END_TIME - START_TIME))ms"
+```
+
+```bash
+ docker compose down product-catalog && IMAGE_TAG=1.0.0-native docker compose up product-catalog -d && \
+START_TIME=$(date +%s%3N) && \
+until $(curl --output /dev/null --silent --head --fail http://localhost:8080/health/ready); do sleep 0.01; done && \
+END_TIME=$(date +%s%3N) && \
+echo "Total Startup Time: $((END_TIME - START_TIME))ms"
+```
+
+### Continuous integration
+
+The project is configured with GitHub Actions to run tests on every push and pull request. The workflow is defined in `.github/workflows/ci.yml` and includes steps to set up Java, build the project, and run tests. The tests will automatically use Testcontainers to spin up a PostgreSQL instance, ensuring that the integration tests are run in an environment that closely mimics production without requiring manual setup. It will also build the jvm and native images an push them to Docker Hub if the tests pass and the branch is `main` (you need to set up secrets for Docker Hub credentials in the repository settings for this to work). This CI pipeline ensures that every change is validated against the full test suite and that production-ready images are built and available for deployment.
