@@ -127,7 +127,7 @@ services:
   # APPLICATION - Product Catalog
   # =====================================
   product-catalog:
-    image: ${IMAGE_GROUP:-bruno}/${IMAGE_NAME:-product-catalog}:${IMAGE_TAG:-1.0.0-jib}
+    image: ${IMAGE_GROUP:-brunoe}/${IMAGE_NAME:-product-catalog}:${IMAGE_TAG:-1.0.0-jib}
     restart: unless-stopped
 
     depends_on:

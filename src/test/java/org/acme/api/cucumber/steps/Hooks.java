@@ -28,16 +28,19 @@ public class Hooks {
 
     @Before("@v3")
     public void setV3() {
+        LOGGER.info("Setting API Version to v3 based on tag");
         versionContext.setVersion("v3");
     }
 
     @Before("@v4")
     public void setV4() {
+        LOGGER.info("Setting API Version to v4 based on tag");
         versionContext.setVersion("v4");
     }
 
     @Before("@v5")
     public void setV5() {
+        LOGGER.info("Setting API Version to v5 based on tag");
         versionContext.setVersion("v5");
     }
 }

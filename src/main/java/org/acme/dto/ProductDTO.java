@@ -1,28 +1,28 @@
 package org.acme.dto;
 
 import java.math.BigDecimal;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 /**
- * DTO utilisé pour exposer un produit via l'API.
+ * Data Transfer Object representing a product in the public API.
  *
- * Points clés :
- * 1. Représente les données du produit telles qu'elles doivent être exposées.
- * 2. Ne contient aucune logique métier ni persistence.
- * 3. Immuable grâce au `record`.
- *
- * Exemple d'utilisation :
- * GET /api/v4/products ou GET /api/v4/products/{sku}
- * Réponse JSON :
- * {
- * "sku": "SKU123",
- * "name": "Chaise",
- * "price": 50.0,
- * "stock": 10
- * }
+ * <p>
+ * Pedagogical points:
+ * <ul>
+ * <li>Read-only contract returned to API consumers.</li>
+ * <li>Decoupled from persistence and domain implementation details.</li>
+ * <li>Ensures API stability regardless of internal refactoring.</li>
+ * </ul>
  */
+@Schema(description = "Product representation for public API responses")
 public record ProductDTO(
-        String sku,
-        String name,
-        BigDecimal price,
-        int stock) {
+
+                @Schema(description = "Unique product identifier", examples = {
+                                "SKU123" }) String sku,
+
+                @Schema(description = "Product name", examples = { "Office Chair" }) String name,
+
+                @Schema(description = "Product price", examples = { "50.00" }) BigDecimal price,
+
+                @Schema(description = "Available stock quantity", examples = { "10" }) int stock) {
 }

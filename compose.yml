@@ -38,7 +38,7 @@ services:
   # Application Quarkus JPA/REST
   product-catalog:
     # Image de l'application, configurable via des variables d'environnement
-    image: ${IMAGE_GROUP:-bruno}/${IMAGE_NAME:-product-catalog}:${IMAGE_TAG:-1.0.0-jib}
+    image: ${IMAGE_GROUP:-brunoe}/${IMAGE_NAME:-product-catalog}:${IMAGE_TAG:-1.0.0-jib}
     # Dépendance sur PostgreSQL avec vérification de santé
     depends_on:
       postgres:

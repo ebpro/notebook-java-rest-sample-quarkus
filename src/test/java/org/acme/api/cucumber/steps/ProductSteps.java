@@ -7,13 +7,11 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.Response;
 
-import org.acme.api.ProductResourceV1;
-import org.acme.api.ProductResourceV2;
 import org.acme.api.client.ProductRestClient;
 import org.acme.api.cucumber.VersionContext;
 import org.acme.dto.CreateProductRequest;
 import org.acme.dto.ProductDTO;
-import org.acme.persistence.ProductRepositoryV5;
+import org.acme.persistence.v5.ProductRepositoryV5;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,9 +60,9 @@ public class ProductSteps {
     @Given("the product catalog is empty")
     public void theProductCatalogIsEmpty() {
         if (versionContext.getVersion().equals("v1"))
-            ProductResourceV1.clearProducts();
+            org.acme.api.v1.ProductResource.clearProducts();
         else if (versionContext.getVersion().equals("v2"))
-            ProductResourceV2.clearProducts();
+            org.acme.api.v2.ProductResource.clearProducts();
         else {
             // 1. Supprime tout
             repository.deleteAll();

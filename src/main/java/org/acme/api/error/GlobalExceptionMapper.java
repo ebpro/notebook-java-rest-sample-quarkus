@@ -10,8 +10,15 @@ import jakarta.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The "Final Safety Net" for the API.
+ * * This mapper catches any Throwable that wasn't caught by more specific
+ * mappers.
+ * It fulfills Non-Functional Requirement (NFR-SEC-03): Prevention of technical
+ * data leakage.
+ */
 @Provider
-@Priority(Priorities.USER + 100) // Très basse priorité
+@Priority(Priorities.USER + 100) // Low priority: only runs if no specific mapper is found
 public class GlobalExceptionMapper implements ExceptionMapper<Throwable> {
 
     private static final Logger LOG = LoggerFactory.getLogger(GlobalExceptionMapper.class);
@@ -19,20 +26,18 @@ public class GlobalExceptionMapper implements ExceptionMapper<Throwable> {
     @Override
     public Response toResponse(Throwable exception) {
 
-        // 1. Si c'est une exception JAX-RS (ex: 400 Bad Request de Jackson)
-        // on la laisse passer telle quelle pour respecter le code HTTP original.
+        // 1. Transparently pass through existing JAX-RS exceptions (like 405 Method Not
+        // Allowed)
+        // to preserve the web framework's native behavior.
         if (exception instanceof WebApplicationException webEx) {
             Response originalResponse = webEx.getResponse();
-
-            // Optionnel : On s'assure que le corps ne contient pas de détails techniques
-            // Si le statut est >= 500, on peut décider de le masquer ici aussi.
             if (originalResponse.getStatus() < 500) {
                 return originalResponse;
             }
         }
 
-        // 2. Pour tout le reste (NullPointerException, erreurs DB, etc.)
-        // C'est ici que le "balai" agit pour éviter les fuites (NFR-SEC-03)
+        // 2. Catch-all for unexpected errors (NullPointer, SQL issues, etc.)
+        // We log the real error for developers but hide details from the client.
         LOG.error("Unhandled error caught by Global Mapper:", exception);
 
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)

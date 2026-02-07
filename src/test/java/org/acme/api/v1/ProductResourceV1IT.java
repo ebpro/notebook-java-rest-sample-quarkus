@@ -1,8 +1,9 @@
-package org.acme.api;
+package org.acme.api.v1;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 
+import org.acme.api.v1.ProductResource;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
@@ -14,7 +15,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @QuarkusTest
-@TestHTTPEndpoint(ProductResourceV1.class)
+@TestHTTPEndpoint(ProductResource.class)
 @DisplayName("ProductResource v1 - In-Memory Tests")
 @Disabled("This is a simple manuel. See ProductV1CucumberIT for real BDD integration tests.")
 class ProductResourceV1IT {

@@ -6,6 +6,12 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import java.util.NoSuchElementException;
 
+/**
+ * Maps {@link NoSuchElementException} to an HTTP 404 Not Found.
+ * * Pedagogical Point: In V5, the Service returns an Optional or throws this
+ * standard Java exception. This mapper bridges that "Pure Java" logic back to
+ * REST.
+ */
 @Provider
 public class NotFoundMapper implements ExceptionMapper<NoSuchElementException> {
     @Override

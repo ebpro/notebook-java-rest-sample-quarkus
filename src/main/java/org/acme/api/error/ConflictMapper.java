@@ -5,12 +5,18 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 
+/**
+ * Maps {@link IllegalStateException} to an HTTP 409 Conflict response.
+ * * Pedagogical Point: In V5, the Service throws this standard Java exception
+ * when a business rule is violated (e.g., trying to create a product with a
+ * duplicate SKU).
+ */
 @Provider
 public class ConflictMapper implements ExceptionMapper<IllegalStateException> {
     @Override
     public Response toResponse(IllegalStateException ex) {
         return Response.status(Response.Status.CONFLICT)
-                .entity(ex.getMessage())
+                .entity(ex.getMessage()) // Send the business rule violation message to the client
                 .type(MediaType.TEXT_PLAIN)
                 .build();
     }

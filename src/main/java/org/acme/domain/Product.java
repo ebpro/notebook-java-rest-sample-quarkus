@@ -1,17 +1,30 @@
 package org.acme.domain;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 
 /**
- * Product métier immuable avec validation renforcée.
+ * Immutable Domain Model representing a Product with enforced business
+ * integrity.
+ * *
+ * <p>
+ * Learning Objectives:
+ * <ul>
+ * <li>Utilizing Java Records for concise, immutable data carriers.</li>
+ * <li>Implementing a <b>Compact Constructor</b> for unified validation.</li>
+ * <li>Adopting the <b>Wither Pattern</b> for state transitions in immutable
+ * objects.</li>
+ * <li>Ensuring Domain Purity: No framework annotations (JPA/JSON) allowed
+ * here.</li>
+ * </ul>
  */
 public record Product(String sku, String name, BigDecimal price, int stock) {
 
     /**
-     * CONSTRUCTEUR COMPACT
-     * Sécurité absolue : Toute création d'instance passe par ici,
-     * y compris le constructeur canonique généré par Java.
+     * COMPACT CONSTRUCTOR
+     * Absolute Security: Every instantiation (canonical or otherwise) must pass
+     * this gate.
+     * We throw {@link IllegalArgumentException}, which is caught by our
+     * DomainExceptionMapper.
      */
     public Product {
         if (sku == null || sku.isBlank()) {
@@ -26,38 +39,41 @@ public record Product(String sku, String name, BigDecimal price, int stock) {
         if (stock < 0) {
             throw new IllegalArgumentException("Stock cannot be negative");
         }
-        // Pas besoin d'assigner this.sku = sku; Java le fait automatiquement après ce
-        // bloc.
+        // Assignment is handled automatically by the Java Record runtime.
     }
 
     /**
-     * Factory method (conservée pour l'expressivité du code).
+     * Factory method for expressive object creation.
      */
     public static Product of(String sku, String name, BigDecimal price, int stock) {
         return new Product(sku, name, price, stock);
     }
 
     /**
-     * Création d'une nouvelle instance avec un nom différent.
+     * WITHER: Returns a new instance with a modified Name.
+     * Essential for maintaining immutability while updating state.
      */
     public Product withName(String newName) {
         return new Product(this.sku, newName, this.price, this.stock);
     }
 
     /**
-     * Création d'une nouvelle instance avec un prix différent.
+     * WITHER: Returns a new instance with a modified Price.
      */
     public Product withPrice(BigDecimal newPrice) {
         return new Product(this.sku, this.name, newPrice, this.stock);
     }
 
     /**
-     * Création d'une nouvelle instance avec un stock différent.
+     * WITHER: Returns a new instance with a modified Stock level.
      */
     public Product withStock(int newStock) {
         return new Product(this.sku, this.name, this.price, newStock);
     }
 
+    /**
+     * Domain Logic: Encapsulates business questions inside the data model.
+     */
     public boolean isInStock() {
         return stock > 0;
     }

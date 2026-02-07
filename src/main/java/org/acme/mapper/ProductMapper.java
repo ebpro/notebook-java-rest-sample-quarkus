@@ -1,17 +1,35 @@
 package org.acme.mapper;
 
-import org.acme.persistence.ProductEntity;
 import org.acme.dto.ProductDTO;
+import org.acme.persistence.ProductEntity;
 import org.acme.dto.CreateProductRequest;
 import org.acme.domain.Product;
 
-public class ProductMapper {
+/**
+ * Component responsible for transforming data between architectural layers.
+ * *
+ * <p>
+ * Pedagogical points:
+ * <ul>
+ * <li>Decouples the API from the persistence model.</li>
+ * <li>Ensures the Domain model is the "source of truth" for business
+ * rules.</li>
+ * <li>Facilitates the transition from request payloads to database
+ * records.</li>
+ * </ul>
+ */
+public final class ProductMapper {
 
     private ProductMapper() {
+        // Prevent instantiation of utility class
     }
 
     /**
-     * Conversion pour la sortie (API)
+     * Maps a Persistence Entity to an API Response DTO.
+     * Used for outbound data (GET requests).
+     *
+     * @param entity the database record
+     * @return the public data transfer object
      */
     public static ProductDTO toDto(ProductEntity entity) {
         return new ProductDTO(
@@ -22,18 +40,28 @@ public class ProductMapper {
     }
 
     /**
-     * Conversion pour l'entrée (Persistance) avec validation Domaine
+     * Maps an API Request DTO to a Persistence Entity via the Domain model.
+     * *
+     * <p>
+     * Process:
+     * 1. Instantiate a Domain object to trigger business validation.
+     * 2. If valid, map to a Persistence Entity for storage.
+     *
+     * @param request the validated creation payload
+     * @return a valid product entity ready for persistence
+     * @throws IllegalArgumentException if domain invariants are violated
      */
     public static ProductEntity toEntity(CreateProductRequest request) {
-        // Étape 1 : Création de l'objet métier (Validation des règles de gestion)
-        // C'est ici que l' IllegalArgumentException est jetée si prix < 0.
+        // Step 1: Create Domain Object (Domain Rule Validation)
+        // This triggers the business logic (e.g., price > 0).
         var domain = Product.of(
                 request.sku(),
                 request.name(),
                 request.price(),
                 request.stock());
 
-        // Étape 2 : Si on arrive ici, le domaine est valide, on peut créer l'entité
+        // Step 2: Convert to Persistence Entity
+        // If execution reaches here, the data is guaranteed to be valid.
         return new ProductEntity(
                 domain.sku(),
                 domain.name(),
