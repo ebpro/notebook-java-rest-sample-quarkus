@@ -38,13 +38,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20' # Explicitly set a stable LTS version
-          cache: 'npm'       # Optional: only if you have a package.json
 
       - name: Build Redoc HTML
         run: |
           mkdir -p public
           # Use npx to run the latest Redocly CLI without manual install
-          npx @redocly/cli build-docs src/main/resources/META-INF/openapi.yaml --output public/index.html
+          npx --yes @redocly/cli build-docs src/main/resources/META-INF/openapi.yaml --output public/index.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
