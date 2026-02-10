@@ -31,7 +31,7 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Product V4", description = "API using DTOs to encapsulate the Domain model")
 @RequestScoped
-public class ProductResource {
+public class ProductResourceV4 {
 
     private final ProductServiceV4 service;
 
@@ -41,7 +41,7 @@ public class ProductResource {
      * @param service Business service handling V4 logic.
      */
     @Inject
-    public ProductResource(ProductServiceV4 service) {
+    public ProductResourceV4(ProductServiceV4 service) {
         this.service = service;
     }
 

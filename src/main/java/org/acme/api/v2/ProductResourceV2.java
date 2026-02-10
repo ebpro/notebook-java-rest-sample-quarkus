@@ -27,7 +27,7 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Product V2", description = "Memory-based API with Path Params and Exceptions")
-public class ProductResource {
+public class ProductResourceV2 {
 
     /**
      * Shared in-memory storage.
@@ -89,7 +89,7 @@ public class ProductResource {
     /**
      * Creates a new product.
      * * @param product Product to create.
-     * 
+     *
      * @return 201 Created.
      * @throws WebApplicationException with 409 Conflict if SKU exists.
      */

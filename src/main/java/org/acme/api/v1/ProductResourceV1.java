@@ -25,7 +25,7 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Product V1", description = "Basic memory-based API for M1 introduction")
-public class ProductResource {
+public class ProductResourceV1 {
 
     /**
      * In-memory storage shared across all requests.

@@ -13,7 +13,7 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @QuarkusTest
-@TestHTTPEndpoint(ProductResource.class)
+@TestHTTPEndpoint(ProductResourceV1.class)
 @DisplayName("ProductResource v1 - In-Memory Tests")
 class ProductResourceV1IT {
 

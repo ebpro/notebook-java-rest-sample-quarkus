@@ -31,7 +31,7 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Product V3", description = "Service-based API with Dependency Injection")
 @RequestScoped
-public class ProductResource {
+public class ProductResourceV3 {
 
     private final ProductServiceV3 service;
 
@@ -42,7 +42,7 @@ public class ProductResource {
      * @param service Business service orchestrating the repository.
      */
     @Inject
-    public ProductResource(ProductServiceV3 service) {
+    public ProductResourceV3(ProductServiceV3 service) {
         this.service = service;
     }
 

@@ -1,3 +1,5 @@
+# This workflow is triggered on pushes and pull requests to the 'develop' and 'main' branches.
+
 name: Java CI with Maven
 
 on:
@@ -8,10 +10,15 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # To run of Github-hosted runners, uncomment the line below and comment out the self-hosted runner line.
+    # runs-on: ubuntu-latest
+    # Use a self-hosted runner to ensure the necessary environment like sonarqube.
+    runs-on: self-hosted
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: Set up JDK 21
       uses: actions/setup-java@v4

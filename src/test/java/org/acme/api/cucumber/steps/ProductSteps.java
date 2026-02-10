@@ -60,9 +60,9 @@ public class ProductSteps {
     @Given("the product catalog is empty")
     public void theProductCatalogIsEmpty() {
         if (versionContext.getVersion().equals("v1"))
-            org.acme.api.v1.ProductResource.clearProducts();
+            org.acme.api.v1.ProductResourceV1.clearProducts();
         else if (versionContext.getVersion().equals("v2"))
-            org.acme.api.v2.ProductResource.clearProducts();
+            org.acme.api.v2.ProductResourceV2.clearProducts();
         else {
             // 1. Supprime tout
             repository.deleteAll();

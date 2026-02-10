@@ -40,12 +40,12 @@ import java.util.NoSuchElementException;
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "Product V5", description = "Validated and documented production-ready API")
 @RequestScoped
-public class ProductResource {
+public class ProductResourceV5 {
 
     private final ProductServiceV5 service;
 
     @Inject
-    public ProductResource(ProductServiceV5 service) {
+    public ProductResourceV5(ProductServiceV5 service) {
         this.service = service;
     }
 
