@@ -13,7 +13,7 @@ jobs:
     # To run of Github-hosted runners, uncomment the line below and comment out the self-hosted runner line.
     # runs-on: ubuntu-latest
     # Use a self-hosted runner to ensure the necessary environment like sonarqube.
-    runs-on: self-hosted
+    runs-on: ebpro-org
 
     steps:
     - uses: actions/checkout@v4
