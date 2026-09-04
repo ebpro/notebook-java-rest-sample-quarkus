@@ -30,6 +30,10 @@
         <cucumber.version>7.34.2</cucumber.version>
         <quarkus-cucumber.version>1.3.0</quarkus-cucumber.version>
 
+        <!-- SonarQube analysis and JaCoCo coverage (see the "sonar" profile) -->
+        <sonar.maven.plugin.version>5.5.0.6356</sonar.maven.plugin.version>
+        <jacoco.maven.plugin.version>0.8.14</jacoco.maven.plugin.version>
+
         <!-- For reproducible builds -->
         <project.build.outputTimestamp>2026-02-07T15:00:00Z</project.build.outputTimestamp>
     </properties>
@@ -295,6 +299,49 @@
                 <quarkus.container-image.tag>1.0.0-native</quarkus.container-image.tag>
                 <quarkus.jib.base-native-image>quay.io/quarkus/ubi9-quarkus-mandrel-builder-image:jdk-21</quarkus.jib.base-native-image>
             </properties>
+        </profile>
+
+        <!-- Profile Sonar: activated with -Psonar. Runs SonarQube analysis and JaCoCo
+          coverage. Requires SONAR_URL and SONAR_TOKEN environment variables. -->
+        <profile>
+            <id>sonar</id>
+            <properties>
+                <sonar.host.url>${SONAR_URL}</sonar.host.url>
+                <sonar.token>${SONAR_TOKEN}</sonar.token>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>${jacoco.maven.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>report</id>
+                                <goals>
+                                    <goal>report</goal>
+                                </goals>
+                                <configuration>
+                                    <formats>
+                                        <format>XML</format>
+                                    </formats>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.sonarsource.scanner.maven</groupId>
+                        <artifactId>sonar-maven-plugin</artifactId>
+                        <version>${sonar.maven.plugin.version}</version>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
 
     </profiles>
