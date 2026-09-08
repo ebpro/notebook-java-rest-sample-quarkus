@@ -52,6 +52,7 @@ jobs:
           -Pjvm \
           -Dquarkus.container-image.push=true \
           -Dquarkus.container-image.registry=docker.io \
+          -Dquarkus.jib.platforms=linux/${{ matrix.arch }} \
           -Dquarkus.container-image.tag=${GITHUB_SHA}-${{ matrix.arch }}
 
   manifest:
