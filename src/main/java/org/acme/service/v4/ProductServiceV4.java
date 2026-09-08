@@ -10,6 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.util.List;
@@ -52,7 +53,11 @@ public class ProductServiceV4 {
     public ProductDTO getBySku(String sku) {
         return repository.findBySku(sku)
                 .map(ProductMapper::toDto)
-                .orElseThrow(() -> new NotFoundException("Product with SKU " + sku + " not found"));
+                .orElseThrow(() -> new NotFoundException(
+                        Response.status(Response.Status.NOT_FOUND)
+                                .entity("Product not found: " + sku)
+                                .type(MediaType.TEXT_PLAIN_TYPE)
+                                .build()));
     }
 
     /**
@@ -72,8 +77,10 @@ public class ProductServiceV4 {
         // Step 2: Check persistence integrity
         if (repository.findBySku(entity.getSku()).isPresent()) {
             throw new WebApplicationException(
-                    "Product with this SKU already exists",
-                    Response.Status.CONFLICT);
+                    Response.status(Response.Status.CONFLICT)
+                            .entity("Product SKU already exists: " + entity.getSku())
+                            .type(MediaType.TEXT_PLAIN_TYPE)
+                            .build());
         }
 
         // Step 3: Persist and Return DTO
@@ -90,7 +97,11 @@ public class ProductServiceV4 {
                 .ifPresentOrElse(
                         repository::delete,
                         () -> {
-                            throw new NotFoundException("Product SKU " + sku + " not found");
+                            throw new NotFoundException(
+                                    Response.status(Response.Status.NOT_FOUND)
+                                            .entity("Product not found: " + sku)
+                                            .type(MediaType.TEXT_PLAIN_TYPE)
+                                            .build());
                         });
     }
 
