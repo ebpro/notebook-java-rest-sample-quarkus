@@ -7,6 +7,9 @@ import org.acme.testresources.PostgreSqlTestResource;
 import io.quarkiverse.cucumber.CucumberOptions;
 
 @QuarkusTestResource(PostgreSqlTestResource.class)
-@CucumberOptions(features = "classpath:features/v2", glue = "org.acme.api.cucumber.steps")
+@CucumberOptions(features = "classpath:features/v2", glue = {
+                "org.acme.api.cucumber.steps",
+                "org.acme.api.cucumber.v2"
+})
 public class CatalogV2AcceptanceIT extends CucumberQuarkusTest {
 }

@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import java.util.List;
@@ -56,7 +57,11 @@ public class ProductServiceV3 {
      */
     public ProductEntity getBySku(String sku) {
         return repository.findBySku(sku)
-                .orElseThrow(() -> new NotFoundException("Product not found: " + sku));
+                .orElseThrow(() -> new NotFoundException(
+                        Response.status(Response.Status.NOT_FOUND)
+                                .entity("Product not found: " + sku)
+                                .type(MediaType.TEXT_PLAIN_TYPE)
+                                .build()));
     }
 
     /**
@@ -76,8 +81,10 @@ public class ProductServiceV3 {
         // Since Repository returns Optional, we check presence.
         if (repository.findBySku(product.getSku()).isPresent()) {
             throw new WebApplicationException(
-                    "Product with this SKU already exists",
-                    Response.Status.CONFLICT);
+                    Response.status(Response.Status.CONFLICT)
+                            .entity("Product SKU already exists: " + product.getSku())
+                            .type(MediaType.TEXT_PLAIN_TYPE)
+                            .build());
         }
         return repository.persist(product);
     }

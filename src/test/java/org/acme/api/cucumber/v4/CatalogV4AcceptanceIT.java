@@ -9,6 +9,9 @@ import org.acme.testresources.PostgreSqlTestResource;
 @CucumberOptions(features = {
                 "classpath:features/catalog",
                 "classpath:features/v4"
-}, tags = "@v4", glue = "org.acme.api.cucumber.steps")
+}, tags = "@v4", glue = {
+                "org.acme.api.cucumber.steps",
+                "org.acme.api.cucumber.v4"
+})
 public class CatalogV4AcceptanceIT extends CucumberQuarkusTest {
 }
