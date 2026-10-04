@@ -10,10 +10,16 @@ on:
 
 jobs:
   build:
-    # To run of Github-hosted runners, uncomment the line below and comment out the self-hosted runner line.
-    # runs-on: ubuntu-latest
-    # Use a self-hosted runner to ensure the necessary environment like sonarqube.
-    runs-on: self-hosted
+    # Native per-arch builds on dedicated ARC scale sets (no QEMU/binfmt):
+    #   amd64 -> ebpro-org (x64 node), arm64 -> ebpro-org-arm (arm64 node).
+    # Each leg builds its own platform natively; the manifest job assembles
+    # the multi-arch manifest list registry-side (docker buildx imagetools).
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm64]
+    runs-on: ${{ matrix.arch == 'arm64' && 'ebpro-org-arm' || 'ebpro-org' }}
+    timeout-minutes: 30
 
     steps:
     - uses: actions/checkout@v4
@@ -38,7 +44,7 @@ jobs:
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    - name: Build and Push Multi-arch Image
+    - name: Build and Push Image (native ${{ matrix.arch }})
       run: |
         # Get the timestamp of the latest commit
         TIMESTAMP=$(git log -1 --format=%cI)
@@ -46,7 +52,32 @@ jobs:
           -Pjvm \
           -Dquarkus.container-image.push=true \
           -Dquarkus.container-image.registry=docker.io \
-          -Dquarkus.jib.platforms=linux/amd64,linux/arm64
+          -Dquarkus.jib.platforms=linux/${{ matrix.arch }} \
+          -Dquarkus.container-image.tag=${GITHUB_SHA}-${{ matrix.arch }}
+
+  manifest:
+    # Assemble the multi-arch manifest list registry-side: no image is pulled
+    # or re-pushed locally, so this works on any arch and needs no QEMU.
+    needs: build
+    runs-on: ebpro-org
+    timeout-minutes: 10
+
+    steps:
+    - name: Login to DockerHub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Create multi-arch manifest
+      run: |
+        docker buildx imagetools create \
+          -t docker.io/brunoe/product-catalog:${GITHUB_SHA} \
+          -t docker.io/brunoe/product-catalog:latest \
+          docker.io/brunoe/product-catalog:${GITHUB_SHA}-amd64 \
+          docker.io/brunoe/product-catalog:${GITHUB_SHA}-arm64
+    - name: Verify manifest
+      run: |
+        docker buildx imagetools inspect docker.io/brunoe/product-catalog:${GITHUB_SHA}
 
   deploy-docs:
     runs-on: ubuntu-latest
